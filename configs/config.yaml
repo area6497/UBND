@@ -1,0 +1,289 @@
+
+
+project:
+  name: UBND_final
+  task: breast_ultrasound_benign_malignant_classification
+  description: 
+  num_classes: 2
+  class_names:
+    - benign
+    - malignant
+  seed: null
+  deterministic: false
+
+paths:
+  # 
+  data_root: ./data
+  busi_root: ./data/BUSI
+  udiat_root: ./data/UDIAT
+  private_root: ./data/Private
+  train_list: ./data/train.txt
+  val_list: ./data/val.txt
+  test_list: ./data/test.txt
+  private_list: ./data/private.txt
+  checkpoints_dir: ./checkpoints
+  logs_dir: ./logs
+  outputs_dir: ./outputs
+
+data:
+  image_size: 224
+  input_channels: 3
+  # 
+  preprocessing:
+    use_nlm_denoising: true
+    nlm:
+      h: 10
+      template_window_size: 7
+      search_window_size: 21
+      note: 
+    resize:
+      size:
+        - 224
+        - 224
+      interpolation: bilinear
+    normalize:
+      # 
+      mean:
+        - 0.485
+        - 0.456
+        - 0.406
+      std:
+        - 0.229
+        - 0.224
+        - 0.225
+      note: 
+
+  split:
+    strategy: five_fold_cross_validation
+    num_folds: 5
+    public_datasets:
+      - BUSI
+      - UDIAT
+    external_validation_dataset: Private
+    train_augmentation_only: true
+    note: 
+
+  augmentation:
+    #
+    enabled: true
+    expand_factor: 5
+    apply_to:
+      - train
+    random_horizontal_flip:
+      enabled: true
+      p: 0.5
+    random_vertical_flip:
+      enabled: true
+      p: 0.5
+    random_rotation:
+      enabled: true
+      degrees: 15
+      note: 
+    color_jitter:
+      enabled: true
+      brightness: 0.2
+      contrast: 0.2
+      saturation: 0.1
+      hue: 0.02
+      note: 
+    affine:
+      enabled: true
+      degrees: 0
+      translate:
+        - 0.05
+        - 0.05
+      scale:
+        - 0.95
+        - 1.05
+      shear: 5
+      note: 
+    random_resized_crop:
+      enabled: true
+      size: 224
+      scale:
+        - 0.85
+        - 1.0
+      ratio:
+        - 0.9
+        - 1.1
+    perspective:
+      enabled: true
+      distortion_scale: 0.2
+      p: 0.3
+
+model:
+  name: UBNDStudent
+  num_classes: 2
+  input_size:
+    - 3
+    - 224
+    - 224
+  backbone:
+    stem_channels: 32
+    stages:
+      # Conv 3x3 -> Fused-IB -> ExtraDW -> IB -> attention/fusion -> ConvNeXt -> ExtraDW -> Dual-IB。
+      - name: stem_conv
+        type: ConvBNAct
+        in_channels: 3
+        out_channels: 32
+        kernel_size: 3
+        stride: 2
+      - name: fused_ib
+        type: FusedIB
+        in_channels: 32
+        out_channels: 64
+        kernel_size: 3
+        stride: 2
+        expansion: 2
+      - name: extra_dw_5x5
+        type: ExtraDW
+        in_channels: 64
+        out_channels: 128
+        kernel_size: 5
+        stride: 2
+      - name: inverted_bottleneck_block_1
+        type: InvertedBottleneck
+        in_channels: 128
+        out_channels: 128
+        kernel_size: 3
+        stride: 1
+        expansion: 2
+        repeat: 2
+      - name: convnext_block
+        type: ConvNeXtLiteBlock
+        in_channels: 128
+        out_channels: 384
+        kernel_size: 3
+        stride: 1
+      - name: extra_dw_3x3
+        type: ExtraDW
+        in_channels: 384
+        out_channels: 256
+        kernel_size: 3
+        stride: 2
+      - name: dual_ib
+        type: DualIB
+        in_channels: 256
+        out_channels: 256
+        kernels:
+          - 3
+          - 5
+        use_se: true
+        use_residual: true
+
+  fusion:
+    name: HFFusion
+    enabled: true
+    low_level_channels: 384
+    high_level_channels: 256
+    out_channels: 256
+    spatial_attention: true
+    channel_attention: true
+    irmlp: true
+    note: 
+
+  head:
+    type: ClassificationHead
+    in_channels: 256
+    hidden_channels: null
+    dropout: 0.0
+    pooling: global_average_pooling
+
+teacher:
+  enabled: true
+  architecture: densenet121
+  pretrained: true
+  weights: null
+  freeze: true
+  num_classes: 2
+  note: 
+
+loss:
+  name: TotalDistillationLoss
+  # 
+  alpha: 0.5
+  temperature: 6.0
+  hybrid_lmf:
+    enabled: true
+    focal_loss:
+      enabled: true
+      gamma: 2.0
+      alpha: null
+      note: 
+    ldam_loss:
+      enabled: true
+      max_m: 0.5
+      scale: 30.0
+      note: 
+    lmf_weight: 0.5
+    note: 
+  kd:
+    type: kl_divergence
+    reduction: batchmean
+    multiply_temperature_squared: true
+
+train:
+  device: cuda
+  epochs: 150
+  batch_size: 32
+  num_workers: 4
+  pin_memory: true
+  amp:
+    enabled: false
+    note: 
+  optimizer:
+    type: AdamW
+    lr: 0.0008
+    weight_decay: 0.0001
+  scheduler:
+    type: CosineAnnealingLR
+    min_lr: 0.000001
+    warmup_epochs: 0
+    note: 
+  checkpoint:
+    save_best: true
+    monitor: val_acc
+    mode: max
+    save_last: true
+  early_stopping:
+    enabled: false
+    note: 
+  tensorboard:
+    enabled: true
+
+test:
+  batch_size: 32
+  metrics:
+    - accuracy
+    - precision
+    - recall
+    - f1
+    - specificity
+    - sensitivity
+    - auc
+    - confusion_matrix
+  threshold: 0.5
+  save_predictions: true
+  save_roc_curve: true
+  save_confusion_matrix: true
+
+inference:
+  batch_size: 1
+  threshold: 0.5
+  save_probabilities: true
+  save_csv: true
+  save_visualization: true
+
+visualization:
+  cam_methods:
+    - gradcam
+    - gradcam_plus_plus
+    - xgradcam
+    - eigengradcam
+    - layercam
+  target_layer: auto
+  save_feature_maps: true
+  save_attention_maps: true
+
+reproducibility:
+
