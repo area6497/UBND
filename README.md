@@ -97,7 +97,7 @@ Each line contains one image path and one class label:
 - Scheduler: Cosine Annealing
 - Minimum learning rate: 1e-6
 - Knowledge distillation temperature: T = 6
-- Knowledge distillation weight: alpha = 0.5
+- Balance parameter weight: alpha = 0.5
 - Teacher model: DenseNet121
 - Focal Loss gamma: 2.0
 - LDAM max_m: 0.5
