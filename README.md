@@ -97,7 +97,6 @@ Each line contains one image path and one class label:
 
 - Input size: 224 x 224
 - Batch size: 32
-- Epochs: 150
 - Optimizer: AdamW
 - Learning rate: 0.0008
 - Weight decay: 1e-4
@@ -106,17 +105,10 @@ Each line contains one image path and one class label:
 - Knowledge distillation temperature: T = 6
 - Knowledge distillation weight: alpha = 0.5
 - Teacher model: DenseNet121
-- Public dataset validation: five-fold cross-validation on BUSI and UDIAT
-- External validation: an independent external dataset is used only for evaluation and is not used for training, augmentation, hyperparameter tuning, or model selection
-
-
-
-- NLM denoising parameters: common OpenCV-style defaults
 - Focal Loss gamma: 2.0
 - LDAM max_m: 0.5
 - LDAM scale: 30.0
 - Internal Focal/LDAM weight in LMF: 0.5
-- Some augmentation strengths: supplemented based on common public medical image classification implementations
 
 These supplementary settings can be modified in `configs/config.yaml`.
 
