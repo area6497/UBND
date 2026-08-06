@@ -1,7 +1,7 @@
 
 
 project:
-  name: UBND_final
+  name: UBND
   task: breast_ultrasound_benign_malignant_classification
   description: 
   num_classes: 2
