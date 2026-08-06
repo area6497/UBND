@@ -48,13 +48,7 @@ UBND/
 |   `-- network.py           
 |-- trainers/               
 |-- utils/                    
-|-- visualization/            
-|-- checkpoints/              
-|-- logs/                    
-|-- outputs/                 
-|-- train.py
-|-- test.py
-|-- inference.py
+|-- visualization/                                                         
 |-- requirements.txt
 `-- README.md
 ```
