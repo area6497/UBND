@@ -12,7 +12,7 @@ project:
   deterministic: false
 
 paths:
-  # 
+
   data_root: ./data
   busi_root: ./data/BUSI
   udiat_root: ./data/UDIAT
@@ -42,7 +42,7 @@ data:
         - 224
       interpolation: bilinear
     normalize:
-      # 
+
       mean:
         - 0.485
         - 0.456
