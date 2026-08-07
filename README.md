@@ -4,7 +4,7 @@
 
 A deep learning framework integrating Dual-IB, hierarchical feature fusion, and knowledge distillation enables accurate, generalizable, and interpretable classification of benign and malignant breast ultrasound lesions. The final model includes:
 
-- Student network: a pruned CNN backbone.
+- Student network:  CNN backbone.
 - Dual Inverted Bottleneck Block (Dual-IB).
 - Hierarchical Feature Fusion (HF Fusion).
 - Teacher model: DenseNet121.
@@ -109,7 +109,7 @@ These supplementary settings can be modified in `configs/config.yaml`.
 
 ## Visualization
 
-The manuscript uses the following CAM methods for interpretability analysis:
+The following CAM method is adopted for interpretability analysis:
 
 - GradCAM
 - GradCAM++
