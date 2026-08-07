@@ -117,7 +117,6 @@ The manuscript uses the following CAM methods for interpretability analysis:
 - EigenGradCAM
 - LayerCAM
 
-This project provides a unified CAM interface in `visualization/cam.py`, based on the `grad-cam` package.
 
 ## Citation
 
