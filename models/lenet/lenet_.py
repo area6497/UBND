@@ -1,4 +1,4 @@
-# model settings
+#  settings
 
 model_cfg = dict(
     backbone=dict(type='LeNet5', num_classes=10),
@@ -9,7 +9,7 @@ model_cfg = dict(
             type='CrossEntropyLoss', loss_weight=1.0),
     ))
 
-# dataloader pipeline
+# data loader pipeline
 img_norm_cfg = dict(
     mean=[33.405], std=[78.795], to_rgb=False)
 train_pipeline = [
