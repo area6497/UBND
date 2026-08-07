@@ -1,0 +1,12 @@
+python>=3.10
+torch>=2.0
+torchvision>=0.15
+numpy>=1.23
+opencv-python>=4.8
+Pillow>=9.5
+scikit-learn>=1.2
+matplotlib>=3.7
+tqdm>=4.65
+PyYAML>=6.0
+tensorboard>=2.12
+grad-cam>=1.4.8
